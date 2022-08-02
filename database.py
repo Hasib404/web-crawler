@@ -1,9 +1,19 @@
+import os
+
 import psycopg2
 from psycopg2 import Error
 
 
 try:
-    db_connect = psycopg2.connect(database="appdb", user = "appuser", password = "apppass", host = "db", port = "5432")
+    databse = os.getenv("POSTGRES_DB")
+    user = os.getenv("POSTGRES_USER")
+    password = os.getenv("POSTGRES_PASSWORD")
+    host = os.getenv("POSTGRES_HOST")
+    port = os.getenv("POSTGRES_PORT")
+
+    db_connect = psycopg2.connect(
+        database=databse, user=user, password=password, host=host, port=port
+    )
     print("Opened PostgreSQL successfully")
 
 except (Exception, Error) as error:
@@ -14,7 +24,8 @@ def add_events_table():
     try:
         db_cursor = db_connect.cursor()
         db_cursor.execute("DROP TABLE IF EXISTS events;")
-        db_cursor.execute('''CREATE TABLE EVENTS
+        db_cursor.execute(
+            """CREATE TABLE EVENTS
             (URL   VARCHAR(255)  PRIMARY KEY    NOT NULL,
             TITLE     VARCHAR(255),
             LOCATION     VARCHAR(255),
@@ -23,7 +34,8 @@ def add_events_table():
             PRICE    VARCHAR(255),
             ARTISTS     VARCHAR(255),
             IMAGE     VARCHAR(500),
-            CREATED_AT   TIMESTAMPTZ    NOT NULL   DEFAULT   NOW());''')
+            CREATED_AT   TIMESTAMPTZ    NOT NULL   DEFAULT   NOW());"""
+        )
         print("Table created successfully")
         db_connect.commit()
 
@@ -35,30 +47,34 @@ def add_events_table():
 def insert_events_info(path, title, location, date, time, price, artists, img_link):
     try:
         db_cursor = db_connect.cursor()
-        db_cursor.execute("""
+        db_cursor.execute(
+            """
             INSERT INTO events 
             (url, title, location, date, time, price, artists, image) 
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
-            """, 
-            (path, title, location, date, time, price, artists, img_link));
+            """,
+            (path, title, location, date, time, price, artists, img_link),
+        )
         db_connect.commit()
 
     except (Exception, Error) as error:
-        print( error)
+        print(error)
         db_connect.rollback()
 
 
 def fetch_events_info():
     try:
         db_cursor = db_connect.cursor()
-        db_cursor.execute("""
+        db_cursor.execute(
+            """
             SELECT DISTINCT
             TO_CHAR(DATE(events.date), 'dd/mm')   AS day,
             COUNT(*)   AS count
             FROM events 
             GROUP BY day
             ORDER BY day ASC
-        """);
+        """
+        )
         db_connect.commit()
 
         event_occurrence_with_date = db_cursor.fetchall()

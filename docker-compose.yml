@@ -8,7 +8,11 @@ services:
       - .:/usr/app/src
     tty: true
     environment:
-      DATABASE_URL: postgres://appuser@localhost/appdb
+      - POSTGRES_USER=appuser
+      - POSTGRES_PASSWORD=apppass
+      - POSTGRES_DB=appdb
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
     command: python3 ./main.py 
   db:
     image: postgres
@@ -18,7 +22,7 @@ services:
       - POSTGRES_PASSWORD=apppass
       - POSTGRES_DB=appdb
     ports:
-      - '5440:5432'
+      - '5432:5432'
     volumes:
       - appdb:/var/lib/postgresql/appdata
 volumes:
