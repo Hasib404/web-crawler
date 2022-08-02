@@ -1,0 +1,7 @@
+beautifulsoup4
+lxml
+matplotlib
+numpy
+psycopg2-binary
+requests
+tqdm
